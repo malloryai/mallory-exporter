@@ -1,0 +1,12 @@
+# compiled binary
+/mallory-exporter
+
+# example exports
+*.csv
+*.jsonl
+
+# OS / editor
+.DS_Store
+*.swp
+.idea/
+.vscode/
