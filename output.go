@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"sort"
+	"strings"
 )
 
 // sink writes records in a chosen format. emit receives the (possibly
@@ -128,17 +129,20 @@ func (s *csvSink) close() error {
 	return s.w.Error()
 }
 
-// defaultColumns picks a sensible CSV header order. For known entities we hand-pick
-// a useful subset; otherwise we union all keys present in the first record.
+// defaultColumns picks a sensible CSV header order. For known entities we
+// hand-pick a useful subset; otherwise we union all keys present in the first
+// record. Any gen_* field present in the record but not in the base list is
+// always appended so AI-generated content (gen_impact, gen_mitigations, etc.)
+// is exported out of the box.
 func defaultColumns(entity string, rec map[string]json.RawMessage, useExport bool) []string {
+	var cols []string
 	switch entity {
 	case "vulnerabilities":
-		cols := []string{
+		cols = []string{
 			"uuid", "cve_id", "state", "published_at",
-			"description", "gen_description",
+			"description",
 			"cvss_base_score", "cvss_version", "cvss_vector", "cvss_type",
 			"epss_score", "epss_percentile",
-			"gen_cwe_id",
 			"cisa_kev_added_at",
 			"mentions_count", "exploits_count", "exploitations_count",
 		}
@@ -146,31 +150,48 @@ func defaultColumns(entity string, rec map[string]json.RawMessage, useExport boo
 			cols = append(cols, "impacted_products_count", "impacted_products",
 				"exploits_summary", "advisories_summary")
 		}
-		return cols
 	case "actors":
-		return []string{"uuid", "internal_name", "display_name", "description",
+		cols = []string{"uuid", "internal_name", "display_name", "description",
 			"motivation", "sponsor", "family_name",
 			"source_countries", "targeted_countries", "targeted_industries",
 			"attack_patterns_count", "mentions_count",
 			"created_at", "updated_at"}
 	case "malware":
-		return []string{"uuid", "internal_name", "display_name", "description",
-			"gen_description", "mentions_count", "created_at", "updated_at"}
+		cols = []string{"uuid", "internal_name", "display_name", "description",
+			"mentions_count", "created_at", "updated_at"}
+	default:
+		keys := make([]string, 0, len(rec))
+		for k := range rec {
+			keys = append(keys, k)
+		}
+		sort.Strings(keys)
+		cols = reorderColumns(keys, []string{
+			"uuid", "cve_id", "name", "display_name", "internal_name",
+			"description",
+			"cvss_base_score", "cvss_version", "cvss_vector", "cvss_type",
+			"epss_score", "epss_percentile",
+			"state", "cisa_kev_added_at", "published_at",
+			"created_at", "updated_at", "enriched_at",
+		})
 	}
-	keys := make([]string, 0, len(rec))
+	return appendGenFields(cols, rec)
+}
+
+// appendGenFields appends every gen_* key from rec that isn't already in cols.
+// They're sorted so the column order is stable across runs.
+func appendGenFields(cols []string, rec map[string]json.RawMessage) []string {
+	existing := make(map[string]bool, len(cols))
+	for _, c := range cols {
+		existing[c] = true
+	}
+	var gens []string
 	for k := range rec {
-		keys = append(keys, k)
+		if strings.HasPrefix(k, "gen_") && !existing[k] {
+			gens = append(gens, k)
+		}
 	}
-	sort.Strings(keys)
-	return reorderColumns(keys, []string{
-		"uuid", "cve_id", "name", "display_name", "internal_name",
-		"description", "gen_description",
-		"cvss_base_score", "cvss_version", "cvss_vector", "cvss_type",
-		"epss_score", "epss_percentile",
-		"gen_cwe_id",
-		"state", "cisa_kev_added_at", "published_at",
-		"created_at", "updated_at", "enriched_at",
-	})
+	sort.Strings(gens)
+	return append(cols, gens...)
 }
 
 func reorderColumns(have []string, preferred []string) []string {
