@@ -65,7 +65,7 @@ func (c *client) doGET(ctx context.Context, urlStr string) ([]byte, error) {
 		}
 		req.Header.Set("Authorization", "Bearer "+c.token)
 		req.Header.Set("Accept", "application/json")
-		req.Header.Set("User-Agent", userAgent)
+		req.Header.Set("User-Agent", userAgent())
 
 		if c.verbose {
 			fmt.Fprintln(os.Stderr, "GET", urlStr)

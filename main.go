@@ -19,8 +19,12 @@ import (
 const (
 	defaultBaseURL = "https://api.mallory.ai"
 	defaultLimit   = 100
-	userAgent      = "mallory-exporter/0.1"
 )
+
+// version is injected at build time via -ldflags "-X main.version=...".
+var version = "dev"
+
+func userAgent() string { return "mallory-exporter/" + version }
 
 // knownEntities lists collection endpoints under /v1/<name> that return a
 // paginated list. The CLI also accepts any other path the user supplies.
@@ -108,6 +112,7 @@ func run() error {
 		listEntities bool
 		showHelp     bool
 		showAuthHelp bool
+		showVersion  bool
 	)
 
 	fs := flag.NewFlagSet("mallory-exporter", flag.ContinueOnError)
@@ -138,6 +143,7 @@ func run() error {
 	fs.BoolVar(&cfg.dryRun, "dry-run", false, "Print the first request URL and exit")
 	fs.BoolVar(&listEntities, "list-entities", false, "Print known entity types and exit")
 	fs.BoolVar(&showAuthHelp, "auth-help", false, "Print instructions for getting an API key and exit")
+	fs.BoolVar(&showVersion, "version", false, "Print version and exit")
 	fs.BoolVar(&showHelp, "h", false, "Show help")
 	fs.BoolVar(&showHelp, "help", false, "Show help")
 
@@ -151,6 +157,10 @@ func run() error {
 
 	if showHelp {
 		usage(os.Stdout)
+		return nil
+	}
+	if showVersion {
+		fmt.Println("mallory-exporter", version)
 		return nil
 	}
 	if showAuthHelp {

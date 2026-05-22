@@ -13,10 +13,27 @@ are a quick-reference.
 
 ## Install
 
+Grab a pre-built binary from the
+[releases page](https://github.com/malloryai/mallory-exporter/releases)
+(linux / darwin / windows × amd64 / arm64), or build from source:
+
 ```
 go build -o mallory-exporter .
 export MALLORY_API_KEY=sk_...     # or pass --token
 ```
+
+## Releases
+
+Releases are cut by pushing a `v*` tag — a GitHub Action runs
+[GoReleaser](https://goreleaser.com) and publishes archives + a
+`checksums.txt` to the release.
+
+```bash
+git tag v0.1.0
+git push origin v0.1.0
+```
+
+The injected `main.version` ldflag is reported by `mallory-exporter --version`.
 
 ## Quick start
 
