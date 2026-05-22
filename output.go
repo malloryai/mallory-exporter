@@ -143,7 +143,7 @@ func defaultColumns(entity string, rec map[string]json.RawMessage, useExport boo
 			"mentions_count", "exploits_count", "exploitations_count",
 		}
 		if useExport {
-			cols = append(cols, "impacted_systems_count", "impacted_systems",
+			cols = append(cols, "impacted_products_count", "impacted_products",
 				"exploits_summary", "advisories_summary")
 		}
 		return cols

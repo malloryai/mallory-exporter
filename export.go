@@ -62,7 +62,7 @@ func stringField(rec map[string]json.RawMessage, key string) string {
 }
 
 // flattenExport reshapes an /export bundle into a flat top-level map suitable
-// for CSV/JSON output. For vulnerabilities it surfaces an impacted_systems
+// for CSV/JSON output. For vulnerabilities it surfaces an impacted_products
 // column derived from vulnerable_configurations[].vendor + product name.
 func flattenExport(entity string, bundle map[string]json.RawMessage) map[string]json.RawMessage {
 	out := map[string]json.RawMessage{}
@@ -93,8 +93,8 @@ func flattenExport(entity string, bundle map[string]json.RawMessage) map[string]
 	switch strings.Trim(entity, "/ ") {
 	case "vulnerabilities":
 		if raw, ok := bundle["vulnerable_configurations"]; ok {
-			out["impacted_systems"] = json.RawMessage(quoteJSON(summarizeConfigurations(raw)))
-			out["impacted_systems_count"] = json.RawMessage(fmt.Sprintf("%d", countArray(raw)))
+			out["impacted_products"] = json.RawMessage(quoteJSON(summarizeConfigurations(raw)))
+			out["impacted_products_count"] = json.RawMessage(fmt.Sprintf("%d", countArray(raw)))
 		}
 		if raw, ok := bundle["exploits"]; ok {
 			out["exploits_summary"] = json.RawMessage(quoteJSON(summarizeNamed(raw)))

@@ -498,8 +498,8 @@ Per-record /export bundles (default):
   each record is automatically enriched with the full export bundle.
   For vulnerabilities this adds:
 
-    impacted_systems         deduped vendor + product (+ version range)
-    impacted_systems_count   number of vulnerable configurations
+    impacted_products         deduped vendor + product (+ version range)
+    impacted_products_count   number of vulnerable configurations
     exploits_summary         comma-joined exploit names
     advisories_summary       comma-joined vendor advisory IDs
 

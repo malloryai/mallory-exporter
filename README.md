@@ -167,8 +167,8 @@ For vulnerabilities this adds:
 
 | column                   | source                                                          |
 | ------------------------ | --------------------------------------------------------------- |
-| `impacted_systems`       | deduped `vendor_display_name + product_display_name + version`  |
-| `impacted_systems_count` | length of `vulnerable_configurations`                           |
+| `impacted_products`       | deduped `vendor_display_name + product_display_name + version`  |
+| `impacted_products_count` | length of `vulnerable_configurations`                           |
 | `exploits_summary`       | comma-joined exploit names from the bundle's `exploits[]`       |
 | `advisories_summary`     | comma-joined advisory IDs from the bundle's `advisories[]`      |
 
